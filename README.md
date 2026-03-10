@@ -1,94 +1,87 @@
-# 💼 EF-M6 — Proyecto Integrador Sprint 1  
-## KanbanPro — Prototipo Funcional
+EF- M7 Proyecto integrador Sprint 2
+Proyecto: "KanbanPro" - Kick-off del Sprint 2
+Asunto: 📧 ¡Prototipo aprobado! Iniciando Fase 2: Arquitectura de Datos
 
-## 📌 Descripción General
+De: David, Product Manager de KanbanPro Para: El Equipo de Desarrollo (Tú)
 
-**KanbanPro** es una aplicación web tipo Kanban cuyo objetivo es facilitar la gestión de tareas mediante tableros, listas y tarjetas.  
+¡Hola equipo!
 
-Este proyecto corresponde al **Sprint 1**, enfocado en la creación de un **prototipo funcional renderizado desde servidor**, validando:
+Excelentes noticias: a los stakeholders les encantó el prototipo visual del Sprint 1. La navegación es clara y el diseño del dashboard es exactamente lo que buscábamos. ¡Buen trabajo!
 
-- Diseño visual
-- Navegación
-- Persistencia básica de datos usando archivos JSON
+Ahora es el momento de pasar a la siguiente fase. Con el diseño validado, tenemos luz verde para construir la capa de persistencia. En este sprint, nos centraremos exclusivamente en la base de datos. Necesitamos definir cómo se estructurará, almacenará y relacionará toda la información de nuestros usuarios y sus proyectos.
 
-Para esta primera etapa se utiliza un **archivo JSON local** como base de datos, permitiendo implementar un flujo completo de lectura, modificación y escritura de datos.
+Este es un paso crítico y fundamental para el éxito de KanbanPro. Por ahora, no se preocupen por conectar esto a la interfaz web; el objetivo es crear un modelo de datos sólido y probarlo de forma aislada para garantizar su integridad.
 
----
+¡A construir la base de nuestro proyecto!
 
-## 📧 Kick-off del Proyecto
+Saludos, David
 
-**De:** David — Product Manager de KanbanPro  
-**Para:** Equipo de Desarrollo  
+Resumen del Sprint 2: Modelo de Datos y Capa de Persistencia
+Objetivo del Sprint: Crear la arquitectura completa de la base de datos utilizando PostgreSQL y el ORM Sequelize. El entregable será un conjunto de modelos de datos funcionales y scripts para crear, poblar y probar la base de datos, garantizando que la lógica de negocio esté correctamente representada. La interfaz web visible no sufrirá cambios y seguirá mostrando datos simulados.
 
-> ¡Hola equipo!  
->  
-> Estoy muy emocionado de dar inicio al desarrollo de KanbanPro. Para arrancar con fuerza, necesitamos construir un prototipo funcional que nos permita validar tanto el diseño visual como la experiencia de usuario principal.  
->  
-> El objetivo de este primer sprint es crear una aplicación navegable que no solo luzca como el producto final, sino que también demuestre la funcionalidad clave: la capacidad de añadir una tarea y que esta persista.  
->  
-> Para esta fase inicial, utilizaremos un archivo JSON local en el servidor como nuestra "base de datos". Esto nos dará una prueba de concepto sólida sobre la cual construir.  
->  
-> ¡Vamos a crear la primera versión funcional de KanbanPro!  
->  
-> Saludos,  
-> **David**
+Historias Técnicas a Implementar
+HT-01: Definición de la Arquitectura de Datos con ORM
+Como desarrollador,
 
----
+Necesito definir los modelos y sus relaciones usando Sequelize,
 
-## 🎯 Objetivo del Sprint 1
+Para que la aplicación tenga una forma estructurada y predecible de manejar los datos de Usuarios, Tableros, Listas y Tarjetas.
 
-Construir una **aplicación web inicial renderizada desde el servidor**, incluyendo:
+Criterios de Aceptación:
 
-- Interfaz de usuario
-- Navegación básica
-- Persistencia de datos local usando el sistema de archivos de **Node.js**
+✅ Se deben instalar las dependencias sequelize, pg y pg-hstore.
 
----
+✅ Se debe configurar y verificar una conexión exitosa a la base de datos PostgreSQL.
 
-## 🧩 Historias de Usuario
+✅ Deben existir los archivos de modelo para Usuario, Tablero, Lista y Tarjeta en una carpeta /models.
 
-### HU-01 — Navegación y Estructura Visual
+✅ Se deben establecer correctamente las relaciones "uno a muchos" (hasMany / belongsTo) entre los modelos:
 
-**Como** visitante,  
-**Quiero** navegar por las páginas Inicio, Registro e Inicio de Sesión,  
-**Para** comprender la estructura del sitio.
+Usuario ↔ Tablero
 
-#### ✅ Criterios de Aceptación
+Tablero ↔ Lista
 
-- Existe la ruta `GET /` que renderiza `home.hbs`.
-- Existen las rutas:
-  - `GET /register`
-  - `GET /login`
-- Todas las vistas heredan de un layout principal `layout.hbs`.
+Lista ↔ Tarjeta
 
----
+HT-02: Creación y Poblado Automatizado de la Base de Datos
+Como desarrollador,
 
-### HU-02 — Visualización de Datos Persistentes en el Dashboard
+Necesito un script que cree el esquema de la base de datos y la pueble con datos de prueba,
 
-**Como** usuario (simulado),  
-**Quiero** que el dashboard muestre datos persistentes,  
-**Para** que la información se mantenga al recargar la página.
+Para disponer de un entorno de desarrollo consistente y poder probar la lógica con datos realistas.
 
-#### ✅ Criterios de Aceptación
+Criterios de Aceptación:
 
-- Existe un archivo `data.json` con la estructura inicial.
-- La ruta `GET /dashboard`:
-  - Lee el archivo usando `fs.readFileSync`.
-  - Parsea el contenido usando `JSON.parse`.
-  - Envía los datos a la vista `dashboard.hbs`.
-- La vista utiliza `{{#each}}` para renderizar dinámicamente tableros, listas y tarjetas.
+✅ El método sequelize.sync() debe ser utilizado para crear las tablas en la base de datos a partir de los modelos.
 
----
+✅ Debe existir un script separado (ej: seed.js) que, al ejecutarse (node seed.js), popule las tablas con datos de ejemplo (al menos 2 usuarios, 3 tableros y varias listas/tarjetas).
 
-### HU-03 — Creación y Persistencia de Nuevas Tareas
+HT-03: Verificación de la Lógica del Modelo de Datos
+Como desarrollador,
 
-**Como** usuario (simulado),  
-**Quiero** agregar nuevas tareas mediante un formulario,  
-**Para** que estas queden guardadas.
+Necesito scripts de prueba para realizar operaciones CRUD directamente en la base de datos,
 
-#### ✅ Criterios de Aceptación
+Para asegurar la integridad del modelo y sus relaciones antes de exponerlos a través de una API.
 
-- `dashboard.hbs` incluye un formulario HTML:
+Criterios de Aceptación:
 
-  ```html
-  <form method="POST">
+✅ Debe existir un script separado (ej: test-crud.js).
+
+✅ Este script, al ejecutarse, debe demostrar de forma aislada (sin usar Express) al menos una operación de cada tipo:
+
+Crear: Crear una nueva Tarjeta y asociarla a una Lista existente.
+
+Leer: Leer un Tablero incluyendo sus Listas y Tarjetas asociadas (usando include).
+
+Actualizar: Modificar el título de una Tarjeta o Lista.
+
+Borrar: Eliminar una Tarjeta o Lista.
+
+✅ La salida en la consola del script debe verificar que las operaciones se completaron con éxito.
+
+Requisitos Técnicos
+Base de Datos: PostgreSQL.
+
+ORM: Sequelize.
+
+Enfoque: La lógica de este sprint se desarrolla en scripts ejecutados por Node.js, no a través de rutas de un servidor web. La aplicación web del Sprint 1 no se modifica en su funcionalidad.
