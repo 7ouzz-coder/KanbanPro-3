@@ -3,19 +3,20 @@ const express = require('express');
 const hbs = require('hbs');
 const path = require('path');
 const router = require('./src/routes/routes');
+require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Configuración de middlewares
-app.use(express.static(path.join(__dirname, 'img')));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 // Configuración de Handlebars
 app.set('view engine', 'hbs');
-app.set('views', path.join(__dirname, 'img/views'));
-hbs.registerPartials(path.join(__dirname, 'img/views/partials'));
+app.set('views', path.join(__dirname, 'src/views'));
+hbs.registerPartials(path.join(__dirname, 'src/views/partials'));
 
 // Usar las rutas
 app.use('/', router);
@@ -32,12 +33,6 @@ app.use((req, res) => {
 // Iniciar servidor
 app.listen(PORT, () => {
   console.log('-='.repeat(30));
-  console.log(`Servidor ejecutándose en http://localhost:${PORT}\n`);
-  console.log('Rutas disponibles:');
-  console.log(`  - Inicio:      http://localhost:${PORT}/`);
-  console.log(`  - Registro:    http://localhost:${PORT}/register`);
-  console.log(`  - Login:       http://localhost:${PORT}/login`);
-  console.log(`  - Dashboard:   http://localhost:${PORT}/dashboard`);
-  console.log('');
+  console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
   console.log('-='.repeat(30));
 });
