@@ -2,28 +2,71 @@
     <div class="auth-card">
         <h1>Crear Cuenta</h1>
         <p class="auth-subtitle">Únete a KanbanPro y comienza a organizar tus proyectos</p>
-        
-        <form class="auth-form" action="/register" method="POST">
+
+        <div id="mensaje-error" style="display:none; color:#c0392b; background:#fdecea; padding:10px; border-radius:4px; margin-bottom:15px; font-size:0.9rem;"></div>
+
+        <form class="auth-form" id="form-register">
             <div class="form-group">
                 <label for="nombre">Nombre Completo</label>
                 <input type="text" id="nombre" name="nombre" placeholder="Tu nombre" required>
             </div>
-            
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="email" id="email" name="email" placeholder="tu@email.com" required>
             </div>
-            
             <div class="form-group">
                 <label for="password">Contraseña</label>
                 <input type="password" id="password" name="password" placeholder="Mínimo 6 caracteres" required>
             </div>
-            
-            <button type="submit" class="btn btn-primary btn-block">Registrarse</button>
+            <button type="submit" class="btn btn-primary btn-block" id="btn-register">Registrarse</button>
         </form>
-        
+
         <p class="auth-footer">
             ¿Ya tienes cuenta? <a href="/login">Inicia sesión aquí</a>
         </p>
     </div>
 </div>
+
+<script>
+    document.getElementById('form-register').addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const btn = document.getElementById('btn-register');
+        const errorDiv = document.getElementById('mensaje-error');
+
+        btn.disabled = true;
+        btn.textContent = 'Registrando...';
+        errorDiv.style.display = 'none';
+
+        try {
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    nombre: document.getElementById('nombre').value,
+                    email: document.getElementById('email').value,
+                    password: document.getElementById('password').value,
+                }),
+            });
+
+            const data = await res.json();
+
+            if (!res.ok) {
+                errorDiv.textContent = data.error || 'Error al registrarse';
+                errorDiv.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Registrarse';
+                return;
+            }
+
+            // registro exitoso, ir al login
+            window.location.href = '/login';
+
+        } catch (error) {
+            errorDiv.textContent = 'Error de conexión. Intenta de nuevo.';
+            errorDiv.style.display = 'block';
+            btn.disabled = false;
+            btn.textContent = 'Registrarse';
+        }
+    });
+</script>

@@ -1,118 +1,102 @@
-const fs = require('fs');
-const path = require('path');
+const { Tablero, Lista, Tarjeta } = require('../models');
 
-const DATA_FILE = path.join(__dirname, '../../data.json');
-
-// Funciones para manejar el archivo JSON
-function leerDatos() {
-  try {
-    const contenido = fs.readFileSync(DATA_FILE, 'utf-8');
-    return JSON.parse(contenido);
-  } catch (error) {
-    console.error('Error al leer data.json:', error);
-    return null;
-  }
-}
-
-function escribirDatos(datos) {
-  try {
-    const datosJSON = JSON.stringify(datos, null, 2);
-    fs.writeFileSync(DATA_FILE, datosJSON);
-    return true;
-  } catch (error) {
-    console.error('Error al escribir en data.json:', error);
-    return false;
-  }
-}
-
-// Controladores de páginas
-
+// rutas publicas sin protección
 exports.home = (req, res) => {
   res.render('home', {
     layout: 'layouts/layout',
-    title: 'Inicio'
+    title: 'Inicio',
   });
 };
 
 exports.register = (req, res) => {
   res.render('register', {
     layout: 'layouts/layout',
-    title: 'Registro'
+    title: 'Registro',
   });
 };
 
 exports.procesarRegistro = (req, res) => {
-  console.log('Intento de registro:', req.body);
+  // el registro lo hace auth controller esto solo redirige
   res.redirect('/login');
 };
 
 exports.login = (req, res) => {
   res.render('login', {
     layout: 'layouts/layout',
-    title: 'Iniciar Sesión'
+    title: 'Iniciar Sesión',
   });
 };
 
 exports.procesarLogin = (req, res) => {
-  console.log('Intento de login:', req.body);
+  // el login lo hace auth controller esto solo redirige
   res.redirect('/dashboard');
 };
 
-// Controladores del dashboard
+// dashboard y creación de tarjetas con protección jwt
+exports.dashboard = async (req, res) => {
+  try {
+    const usuarioId = req.usuario.id;
 
-exports.dashboard = (req, res) => {
-  const datos = leerDatos();
-  
-  if (!datos) {
-    return res.status(500).send('Error al cargar los datos del tablero');
+    const tableros = await Tablero.findAll({
+      where: { usuarioId },
+      include: [{ model: Lista, include: [Tarjeta] }],
+    });
+
+    // Si el usuario no tiene tableros, se muestra un mensaje en el dashboard
+    const tableroActivo = tableros[0] || null;
+
+    res.render('dashboard', {
+      layout: 'layouts/layout',
+      title: 'Dashboard',
+      proyecto: {
+        nombre: 'KanbanPro',
+        descripcion: `Bienvenido, ${req.usuario.nombre}`,
+      },
+      tablero: tableroActivo
+        ? {
+            nombre: tableroActivo.nombre,
+            listas: tableroActivo.listas.map((l) => ({
+              id: l.id,
+              nombre: l.nombre,
+              tarjetas: l.tarjetas.map((t) => ({
+                id: t.id,
+                titulo: t.titulo,
+                descripcion: t.descripcion,
+                etiqueta: t.etiqueta,
+              })),
+            })),
+          }
+        : { nombre: 'Sin tableros', listas: [] },
+    });
+  } catch (error) {
+    console.error('Error en dashboard:', error.message);
+    res.status(500).send('Error al cargar el dashboard');
   }
-  
-  res.render('dashboard', {
-    layout: 'layouts/layout',
-    title: 'Dashboard',
-    proyecto: datos.proyecto,
-    tablero: datos.tablero
-  });
 };
 
-exports.crearTarjeta = (req, res) => {
+exports.crearTarjeta = async (req, res) => {
   try {
     const { titulo, descripcion, etiqueta, listaId } = req.body;
-    
-    if (!titulo || !descripcion || !etiqueta) {
+
+    if (!titulo || !descripcion || !etiqueta || !listaId) {
       return res.status(400).send('Faltan datos obligatorios');
     }
 
-    const datos = leerDatos();
-    if (!datos) {
-      return res.status(500).send('Error al leer los datos');
-    }
+    // verificar que la lista pertenece a un tablero del usuario
+    const lista = await Lista.findByPk(listaId, {
+      include: [{ model: Tablero, where: { usuarioId: req.usuario.id } }],
+    });
 
-    const nuevaTarjeta = {
-      id: `tarjeta-${Date.now()}`,
-      titulo,
-      descripcion,
-      etiqueta
-    };
-
-    const lista = datos.tablero.listas.find(l => l.id === (listaId || 'lista-1'));
-    
     if (!lista) {
       return res.status(404).send('Lista no encontrada');
     }
 
-    lista.tarjetas.push(nuevaTarjeta);
+    const posicion = await Tarjeta.count({ where: { listaId } });
 
-    const guardado = escribirDatos(datos);
-    
-    if (!guardado) {
-      return res.status(500).send('Error al guardar los datos');
-    }
-
+    await Tarjeta.create({ titulo, descripcion, etiqueta, posicion, listaId });
     res.redirect('/dashboard');
-    
   } catch (error) {
-    console.error('Error al crear tarjeta:', error);
-    res.status(500).send('Error al procesar la solicitud');
+    console.error('Error en crearTarjeta:', error.message);
+    res.status(500).send('Error al crear la tarjeta');
   }
 };
