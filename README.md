@@ -1,87 +1,109 @@
-EF- M7 Proyecto integrador Sprint 2
-Proyecto: "KanbanPro" - Kick-off del Sprint 2
-Asunto: 📧 ¡Prototipo aprobado! Iniciando Fase 2: Arquitectura de Datos
+EF-M8 Proyecto integrador Sprint 3
+Proyecto: "KanbanPro" - Kick-off del Sprint 3 (Fase Final)
+Asunto: 📧 ¡Fase 3 iniciada! Es hora de darle vida a KanbanPro con la API
 
 De: David, Product Manager de KanbanPro Para: El Equipo de Desarrollo (Tú)
 
 ¡Hola equipo!
 
-Excelentes noticias: a los stakeholders les encantó el prototipo visual del Sprint 1. La navegación es clara y el diseño del dashboard es exactamente lo que buscábamos. ¡Buen trabajo!
+El trabajo realizado en la arquitectura de la base de datos durante el Sprint 2 ha sido impecable. Tenemos un modelo de datos sólido y bien probado, listo para ser el cerebro de nuestra aplicación.
 
-Ahora es el momento de pasar a la siguiente fase. Con el diseño validado, tenemos luz verde para construir la capa de persistencia. En este sprint, nos centraremos exclusivamente en la base de datos. Necesitamos definir cómo se estructurará, almacenará y relacionará toda la información de nuestros usuarios y sus proyectos.
+Llegamos a la fase final y más visible: la construcción de la API RESTful y la conexión de todas las piezas. En este sprint, transformaremos KanbanPro de un conjunto de componentes desacoplados a un Producto Mínimo Viable (MVP) completamente funcional. Implementaremos la seguridad para que nuestros usuarios puedan registrarse e iniciar sesión, construiremos los endpoints para que la aplicación sea interactiva y, finalmente, conectaremos nuestra interfaz visual para que muestre datos reales.
 
-Este es un paso crítico y fundamental para el éxito de KanbanPro. Por ahora, no se preocupen por conectar esto a la interfaz web; el objetivo es crear un modelo de datos sólido y probarlo de forma aislada para garantizar su integridad.
+Este es el sprint donde todo cobra sentido. Al finalizar, tendremos una aplicación funcional de la que estar orgullosos.
 
-¡A construir la base de nuestro proyecto!
+¡Vamos a por el lanzamiento!
 
 Saludos, David
 
-Resumen del Sprint 2: Modelo de Datos y Capa de Persistencia
-Objetivo del Sprint: Crear la arquitectura completa de la base de datos utilizando PostgreSQL y el ORM Sequelize. El entregable será un conjunto de modelos de datos funcionales y scripts para crear, poblar y probar la base de datos, garantizando que la lógica de negocio esté correctamente representada. La interfaz web visible no sufrirá cambios y seguirá mostrando datos simulados.
+Resumen del Sprint 3: API RESTful, Seguridad y Funcionalidad Completa
+Objetivo del Sprint: Desarrollar la API RESTful completa para gestionar todos los recursos de la aplicación, implementar un sistema de autenticación seguro con JWT y, finalmente, conectar las vistas de Handlebars a la base de datos a través de esta nueva capa de API para lograr una aplicación totalmente funcional.
 
-Historias Técnicas a Implementar
-HT-01: Definición de la Arquitectura de Datos con ORM
-Como desarrollador,
+Historias de Usuario y Técnicas a Implementar
+HU-04: Gestión de Cuentas de Usuario
+Como un nuevo usuario,
 
-Necesito definir los modelos y sus relaciones usando Sequelize,
+Quiero poder registrarme en la aplicación con un email y contraseña,
 
-Para que la aplicación tenga una forma estructurada y predecible de manejar los datos de Usuarios, Tableros, Listas y Tarjetas.
+Para crear una cuenta personal y segura.
 
-Criterios de Aceptación:
+Como un usuario ya registrado,
 
-✅ Se deben instalar las dependencias sequelize, pg y pg-hstore.
+Quiero poder iniciar sesión con mis credenciales,
 
-✅ Se debe configurar y verificar una conexión exitosa a la base de datos PostgreSQL.
-
-✅ Deben existir los archivos de modelo para Usuario, Tablero, Lista y Tarjeta en una carpeta /models.
-
-✅ Se deben establecer correctamente las relaciones "uno a muchos" (hasMany / belongsTo) entre los modelos:
-
-Usuario ↔ Tablero
-
-Tablero ↔ Lista
-
-Lista ↔ Tarjeta
-
-HT-02: Creación y Poblado Automatizado de la Base de Datos
-Como desarrollador,
-
-Necesito un script que cree el esquema de la base de datos y la pueble con datos de prueba,
-
-Para disponer de un entorno de desarrollo consistente y poder probar la lógica con datos realistas.
+Para acceder a mis tableros de proyectos.
 
 Criterios de Aceptación:
 
-✅ El método sequelize.sync() debe ser utilizado para crear las tablas en la base de datos a partir de los modelos.
+✅ Se deben instalar las dependencias jsonwebtoken y bcryptjs.
 
-✅ Debe existir un script separado (ej: seed.js) que, al ejecutarse (node seed.js), popule las tablas con datos de ejemplo (al menos 2 usuarios, 3 tableros y varias listas/tarjetas).
+✅ Debe existir un endpoint POST /api/auth/register que cree un nuevo usuario y guarde su contraseña de forma segura (hasheada con bcryptjs).
 
-HT-03: Verificación de la Lógica del Modelo de Datos
+✅ Debe existir un endpoint POST /api/auth/login que verifique las credenciales del usuario y, si son correctas, genere y devuelva un JSON Web Token (JWT).
+
+HT-05: Seguridad de la API
 Como desarrollador,
 
-Necesito scripts de prueba para realizar operaciones CRUD directamente en la base de datos,
+Necesito proteger los endpoints de la aplicación,
 
-Para asegurar la integridad del modelo y sus relaciones antes de exponerlos a través de una API.
+Para asegurar que solo los usuarios autenticados puedan acceder y modificar sus propios datos.
 
 Criterios de Aceptación:
 
-✅ Debe existir un script separado (ej: test-crud.js).
+✅ Se debe crear un middleware de autenticación que intercepte las peticiones.
 
-✅ Este script, al ejecutarse, debe demostrar de forma aislada (sin usar Express) al menos una operación de cada tipo:
+✅ El middleware debe verificar la existencia y validez de un JWT en el header Authorization: Bearer [token].
 
-Crear: Crear una nueva Tarjeta y asociarla a una Lista existente.
+✅ Si el token es inválido o no existe, la API debe devolver un error 401 o 403.
 
-Leer: Leer un Tablero incluyendo sus Listas y Tarjetas asociadas (usando include).
+✅ Todas las rutas de gestión de datos (tableros, listas, tarjetas) deben estar protegidas por este middleware.
 
-Actualizar: Modificar el título de una Tarjeta o Lista.
+HT-06: API RESTful para la Gestión de Proyectos
+Como desarrollador de frontend (simulado),
 
-Borrar: Eliminar una Tarjeta o Lista.
+Necesito un conjunto de endpoints RESTful para gestionar los recursos de la aplicación,
 
-✅ La salida en la consola del script debe verificar que las operaciones se completaron con éxito.
+Para poder construir una interfaz de usuario interactiva y desacoplada.
+
+Criterios de Aceptación:
+
+✅ Se debe crear un router de Express para agrupar todas las rutas de la API (ej: /api).
+
+✅ Se deben implementar todos los endpoints CRUD para los recursos principales:
+
+Tableros: GET, POST, PUT, DELETE en /api/tableros.
+
+Listas: POST, PUT, DELETE en /api/tableros/:tableroId/listas.
+
+Tarjetas: POST, PUT, DELETE en /api/listas/:listaId/tarjetas.
+
+✅ Todos estos endpoints deben usar los métodos de Sequelize para interactuar con la base de datos.
+
+✅ La API debe ser probada exhaustivamente con un cliente como Postman o Insomnia.
+
+HU-07: Conexión de la Interfaz con Datos Reales
+Como usuario con sesión iniciada,
+
+Quiero que el dashboard me muestre mis tableros, listas y tarjetas reales guardados en la base de datos,
+
+Para poder gestionar mi trabajo de forma efectiva.
+
+Criterios de Aceptación:
+
+✅ Las rutas de las vistas (ej: GET /dashboard) deben ser modificadas.
+
+✅ Dentro de estas rutas, se debe llamar a la nueva lógica de los controladores de la API para obtener los datos desde la base de datos usando Sequelize.
+
+✅ Los datos reales (ya no los simulados) deben ser pasados a las plantillas de Handlebars para su renderizado.
 
 Requisitos Técnicos
-Base de Datos: PostgreSQL.
+Arquitectura: API RESTful.
 
-ORM: Sequelize.
+Seguridad: Autenticación basada en JWT, hasheo de contraseñas con bcryptjs.
 
-Enfoque: La lógica de este sprint se desarrolla en scripts ejecutados por Node.js, no a través de rutas de un servidor web. La aplicación web del Sprint 1 no se modifica en su funcionalidad.
+Herramientas: Se requiere el uso de Postman, Insomnia o una herramienta similar para las pruebas de la API.
+
+Entregable
+Un repositorio público en GitHub con el proyecto KanbanPro completamente funcional.
+
+La aplicación debe renderizar datos reales desde la base de datos y tener una API RESTful documentada (en un README.md) y protegida.
