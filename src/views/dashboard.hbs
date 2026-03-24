@@ -7,7 +7,7 @@
 
 <div class="board-container">
     <h2>{{tablero.nombre}}</h2>
-    
+
     <div class="kanban-board">
         {{#each tablero.listas}}
         <div class="kanban-list">
@@ -15,7 +15,7 @@
                 <h3>{{this.nombre}}</h3>
                 <span class="card-count">{{this.tarjetas.length}}</span>
             </div>
-            
+
             <div class="cards-container">
                 {{#each this.tarjetas}}
                 <div class="card">
@@ -27,12 +27,10 @@
                 </div>
                 {{/each}}
             </div>
-            
-            {{#if @first}}
-            <button class="btn-add-card" onclick="document.getElementById('modal-nueva-tarjeta').style.display='block'">
+
+            <button class="btn-add-card" onclick="abrirModal({{this.id}})">
                 + Añadir tarjeta
             </button>
-            {{/if}}
         </div>
         {{/each}}
     </div>
@@ -41,41 +39,72 @@
 <div id="modal-nueva-tarjeta" class="modal">
     <div class="modal-content">
         <span class="close" onclick="document.getElementById('modal-nueva-tarjeta').style.display='none'">&times;</span>
-        
         <h2>Nueva Tarjeta</h2>
-        
-        <form action="/nueva-tarjeta" method="POST">
-            <div class="form-group">
-                <label for="titulo">Título de la tarjeta</label>
-                <input type="text" id="titulo" name="titulo" placeholder="Ej: Implementar nueva funcionalidad" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="descripcion">Descripción</label>
-                <textarea id="descripcion" name="descripcion" rows="3" placeholder="Describe la tarea..." required></textarea>
-            </div>
-            
-            <div class="form-group">
-                <label for="etiqueta">Etiqueta</label>
-                <select id="etiqueta" name="etiqueta" required>
-                    <option value="Setup">Setup</option>
-                    <option value="Diseño">Diseño</option>
-                    <option value="Backend">Backend</option>
-                    <option value="Frontend">Frontend</option>
-                    <option value="Testing">Testing</option>
-                </select>
-            </div>
-            
-            <input type="hidden" name="listaId" value="lista-1">
-            
-            <div class="modal-buttons">
-                <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal-nueva-tarjeta').style.display='none'">
-                    Cancelar
-                </button>
-                <button type="submit" class="btn btn-primary">
-                    Crear Tarjeta
-                </button>
-            </div>
-        </form>
+        <div class="form-group">
+            <label for="titulo">Título</label>
+            <input type="text" id="titulo" placeholder="Ej: Implementar nueva funcionalidad">
+        </div>
+        <div class="form-group">
+            <label for="descripcion">Descripción</label>
+            <textarea id="descripcion" rows="3" placeholder="Describe la tarea..."></textarea>
+        </div>
+        <div class="form-group">
+            <label for="etiqueta">Etiqueta</label>
+            <select id="etiqueta">
+                <option value="Setup">Setup</option>
+                <option value="Diseno">Diseño</option>
+                <option value="Backend">Backend</option>
+                <option value="Frontend">Frontend</option>
+                <option value="Testing">Testing</option>
+            </select>
+        </div>
+        <input type="hidden" id="lista-id-modal">
+        <div class="modal-buttons">
+            <button class="btn btn-secondary" onclick="document.getElementById('modal-nueva-tarjeta').style.display='none'">Cancelar</button>
+            <button class="btn btn-primary" onclick="crearTarjeta()">Crear Tarjeta</button>
+        </div>
     </div>
 </div>
+
+<script>
+    const token = '{{token}}';
+
+    function abrirModal(listaId) {
+        document.getElementById('lista-id-modal').value = listaId;
+        document.getElementById('titulo').value = '';
+        document.getElementById('descripcion').value = '';
+        document.getElementById('modal-nueva-tarjeta').style.display = 'block';
+    }
+
+    async function crearTarjeta() {
+        const listaId = document.getElementById('lista-id-modal').value;
+        const titulo = document.getElementById('titulo').value;
+        const descripcion = document.getElementById('descripcion').value;
+        const etiqueta = document.getElementById('etiqueta').value;
+
+        if (!titulo) return alert('El título es obligatorio');
+
+        try {
+            const res = await fetch(`/api/listas/${listaId}/tarjetas`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token,
+                },
+                body: JSON.stringify({ titulo, descripcion, etiqueta }),
+            });
+
+            if (!res.ok) {
+                const data = await res.json();
+                alert(data.error || 'Error al crear la tarjeta');
+                return;
+            }
+
+            // recargar el dashboard manteniendo el token en la URL
+            window.location.href = '/dashboard?token=' + token;
+
+        } catch (error) {
+            console.error(error);
+        }
+    }
+</script>

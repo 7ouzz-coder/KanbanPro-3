@@ -27,46 +27,4 @@
     </div>
 </div>
 
-<script>
-    document.getElementById('form-register').addEventListener('submit', async function (e) {
-        e.preventDefault();
-
-        const btn = document.getElementById('btn-register');
-        const errorDiv = document.getElementById('mensaje-error');
-
-        btn.disabled = true;
-        btn.textContent = 'Registrando...';
-        errorDiv.style.display = 'none';
-
-        try {
-            const res = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    nombre: document.getElementById('nombre').value,
-                    email: document.getElementById('email').value,
-                    password: document.getElementById('password').value,
-                }),
-            });
-
-            const data = await res.json();
-
-            if (!res.ok) {
-                errorDiv.textContent = data.error || 'Error al registrarse';
-                errorDiv.style.display = 'block';
-                btn.disabled = false;
-                btn.textContent = 'Registrarse';
-                return;
-            }
-
-            // registro exitoso, ir al login
-            window.location.href = '/login';
-
-        } catch (error) {
-            errorDiv.textContent = 'Error de conexión. Intenta de nuevo.';
-            errorDiv.style.display = 'block';
-            btn.disabled = false;
-            btn.textContent = 'Registrarse';
-        }
-    });
-</script>
+{{> auth}}

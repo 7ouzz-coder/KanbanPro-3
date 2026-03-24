@@ -1,0 +1,92 @@
+<script>
+    // registro
+    const formRegister = document.getElementById('form-register');
+    if (formRegister) {
+        formRegister.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('btn-register');
+            const errorDiv = document.getElementById('mensaje-error');
+
+            btn.disabled = true;
+            btn.textContent = 'Registrando...';
+            errorDiv.style.display = 'none';
+
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        nombre: document.getElementById('nombre').value,
+                        email: document.getElementById('email').value,
+                        password: document.getElementById('password').value,
+                    }),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    errorDiv.textContent = data.error || 'Error al registrarse';
+                    errorDiv.style.display = 'block';
+                    btn.disabled = false;
+                    btn.textContent = 'Registrarse';
+                    return;
+                }
+
+                console.log('Usuario registrado:', data);
+
+                window.location.href = '/login';
+
+            } catch (error) {
+                errorDiv.textContent = 'Error de conexión. Intenta de nuevo.';
+                errorDiv.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Registrarse';
+            }
+        });
+    }
+
+    // login
+    const formLogin = document.getElementById('form-login');
+    if (formLogin) {
+        formLogin.addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const btn = document.getElementById('btn-login');
+            const errorDiv = document.getElementById('mensaje-error');
+
+            btn.disabled = true;
+            btn.textContent = 'Entrando...';
+            errorDiv.style.display = 'none';
+
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: document.getElementById('email').value,
+                        password: document.getElementById('password').value,
+                    }),
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) {
+                    errorDiv.textContent = data.error || 'Credenciales incorrectas';
+                    errorDiv.style.display = 'block';
+                    btn.disabled = false;
+                    btn.textContent = 'Iniciar Sesión';
+                    return;
+                }
+
+                window.location.href = '/dashboard?token=' + data.token;
+
+            } catch (error) {
+                errorDiv.textContent = 'Error de conexión. Intenta de nuevo.';
+                errorDiv.style.display = 'block';
+                btn.disabled = false;
+                btn.textContent = 'Iniciar Sesión';
+            }
+        });
+    }
+</script>

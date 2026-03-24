@@ -18,55 +18,9 @@
         </form>
 
         <p class="auth-footer">
-            Aun no tienes cuenta? <a href="/register">Regístrate aquí</a>
+            ¿No tienes cuenta? <a href="/register">Regístrate aquí</a>
         </p>
     </div>
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.getElementById('form-login').addEventListener('submit', async function (e) {
-            e.preventDefault();
-
-            const btn = document.getElementById('btn-login');
-            const errorDiv = document.getElementById('mensaje-error');
-
-            btn.disabled = true;
-            btn.textContent = 'Entrando...';
-            errorDiv.style.display = 'none';
-
-            try {
-                const res = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        email: document.getElementById('email').value,
-                        password: document.getElementById('password').value,
-                    }),
-                });
-
-                const data = await res.json();
-                console.log('status:', res.ok, 'data:', data);
-
-                if (!res.ok) {
-                    errorDiv.textContent = data.error || 'Credenciales incorrectas';
-                    errorDiv.style.display = 'block';
-                    btn.disabled = false;
-                    btn.textContent = 'Iniciar Sesión';
-                    return;
-                }
-
-                document.cookie = `token=${data.token}; path=/; max-age=28800; SameSite=Lax`;
-                console.log('cookie:', document.cookie);
-                window.location.href = '/dashboard';
-
-            } catch (error) {
-                console.error('error fetch:', error);
-                errorDiv.textContent = 'Error de conexión. Intenta de nuevo.';
-                errorDiv.style.display = 'block';
-                btn.disabled = false;
-                btn.textContent = 'Iniciar Sesión';
-            }
-        });
-    });
-</script>
+{{> auth}}

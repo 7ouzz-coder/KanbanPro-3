@@ -1,6 +1,5 @@
 const { Tablero, Lista, Tarjeta } = require('../models');
 
-// rutas publicas sin protección
 exports.home = (req, res) => {
   res.render('home', {
     layout: 'layouts/layout',
@@ -16,7 +15,6 @@ exports.register = (req, res) => {
 };
 
 exports.procesarRegistro = (req, res) => {
-  // el registro lo hace auth controller esto solo redirige
   res.redirect('/login');
 };
 
@@ -28,26 +26,24 @@ exports.login = (req, res) => {
 };
 
 exports.procesarLogin = (req, res) => {
-  // el login lo hace auth controller esto solo redirige
-  res.redirect('/dashboard');
+  res.redirect('/login');
 };
 
-// dashboard y creación de tarjetas con protección jwt
+// el sv obtiene datos con sequelize y los pasa a la vista
 exports.dashboard = async (req, res) => {
   try {
-    const usuarioId = req.usuario.id;
-
     const tableros = await Tablero.findAll({
-      where: { usuarioId },
+      where: { usuarioId: req.usuario.id },
       include: [{ model: Lista, include: [Tarjeta] }],
     });
 
-    // Si el usuario no tiene tableros, se muestra un mensaje en el dashboard
     const tableroActivo = tableros[0] || null;
 
     res.render('dashboard', {
       layout: 'layouts/layout',
       title: 'Dashboard',
+      token: req.query.token,
+      usuario: req.usuario.nombre,
       proyecto: {
         nombre: 'KanbanPro',
         descripcion: `Bienvenido, ${req.usuario.nombre}`,
@@ -71,32 +67,5 @@ exports.dashboard = async (req, res) => {
   } catch (error) {
     console.error('Error en dashboard:', error.message);
     res.status(500).send('Error al cargar el dashboard');
-  }
-};
-
-exports.crearTarjeta = async (req, res) => {
-  try {
-    const { titulo, descripcion, etiqueta, listaId } = req.body;
-
-    if (!titulo || !descripcion || !etiqueta || !listaId) {
-      return res.status(400).send('Faltan datos obligatorios');
-    }
-
-    // verificar que la lista pertenece a un tablero del usuario
-    const lista = await Lista.findByPk(listaId, {
-      include: [{ model: Tablero, where: { usuarioId: req.usuario.id } }],
-    });
-
-    if (!lista) {
-      return res.status(404).send('Lista no encontrada');
-    }
-
-    const posicion = await Tarjeta.count({ where: { listaId } });
-
-    await Tarjeta.create({ titulo, descripcion, etiqueta, posicion, listaId });
-    res.redirect('/dashboard');
-  } catch (error) {
-    console.error('Error en crearTarjeta:', error.message);
-    res.status(500).send('Error al crear la tarjeta');
   }
 };

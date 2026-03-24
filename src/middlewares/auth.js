@@ -1,15 +1,29 @@
 const jwt = require('jsonwebtoken');
 
+// API ROUTES con bearer token
 const verifyToken = (req, res, next) => {
-  // intentamos obtener el token de la cabecera authorization o de las cookies
-  const token =
-    (req.headers['authorization'] || '').replace('Bearer ', '') ||
-    (req.cookies && req.cookies.token);
+  const authHeader = req.headers['authorization'];
+
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    return res.status(401).json({ error: 'Token no proporcionado' });
+  }
+
+  const token = authHeader.split(' ')[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.usuario = decoded;
+    next();
+  } catch (error) {
+    return res.status(403).json({ error: 'Token inválido o expirado' });
+  }
+};
+
+// para vistas protegidas con token en query params
+const verifyTokenVista = (req, res, next) => {
+  const token = req.query.token;
 
   if (!token) {
-    if (req.path.startsWith('/api') || req.xhr) {
-      return res.status(401).json({ error: 'Token no proporcionado' });
-    }
     return res.redirect('/login');
   }
 
@@ -18,11 +32,8 @@ const verifyToken = (req, res, next) => {
     req.usuario = decoded;
     next();
   } catch (error) {
-    if (req.path.startsWith('/api') || req.xhr) {
-      return res.status(403).json({ error: 'Token inválido o expirado' });
-    }
     return res.redirect('/login');
   }
 };
 
-module.exports = { verifyToken };
+module.exports = { verifyToken, verifyTokenVista };
