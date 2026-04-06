@@ -7,15 +7,14 @@ const router = require('./src/routes/routes');
 const apiRouter = require('./src/routes/api.routes');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(process.cwd(), 'public')));
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
 app.set('view engine', 'hbs');
-app.set('views', path.join(__dirname, 'src/views'));
-hbs.registerPartials(path.join(__dirname, 'src/views/partials'));
+app.set('views', path.join(process.cwd(), 'src/views'));
+hbs.registerPartials(path.join(process.cwd(), 'src/views/partials'));
 
 app.use('/api', apiRouter);
 app.use('/', router);
