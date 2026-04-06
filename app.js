@@ -28,8 +28,4 @@ app.use((req, res) => {
   `);
 });
 
-app.listen(PORT, () => {
-  console.log('-='.repeat(30));
-  console.log(`Servidor ejecutándose en http://localhost:${PORT}`);
-  console.log('-='.repeat(30));
-});
+module.exports = app;
